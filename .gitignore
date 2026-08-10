@@ -1,0 +1,22 @@
+# Secrets
+.env
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.ipynb_checkpoints/
+
+# Raw data 
+data/bronze/*.csv
+data/bronze/*.zip
+data/**/*.parquet
+
+# Power BI 
+*.pbix.tmp
+Dashboards.pbix
+
+# OS / logs
+*.log
+Thumbs.db
+.DS_Store
