@@ -28,7 +28,8 @@ FROM   gold.fact_sales   f
 JOIN   gold.dim_product  p ON p.product_id = f.product_id
 JOIN   gold.dim_date     d ON d.date_key   = f.date_key
 GROUP  BY p.department, d.year, d.month, d.month_name
-ORDER  BY revenue DESC;
+ORDER  BY revenue DESC
+LIMIT  30;
 
 
 
@@ -46,7 +47,8 @@ WITH ranked AS (
 SELECT department, commodity_desc, ROUND(revenue, 2) AS revenue, rank
 FROM   ranked
 WHERE  rank <= 5
-ORDER  BY dept_revenue DESC, rank;
+ORDER  BY dept_revenue DESC, rank
+LIMIT  30;
 
 
 
@@ -68,7 +70,7 @@ ORDER  BY year, month;
 
 
 
--- 4. JOINS - the sales fact joined to all four of its dimensions
+-- 4a. JOINS - the sales fact joined to all four of its dimensions
 SELECT d.date_key,
        p.department,
        p.commodity_desc,
@@ -82,11 +84,11 @@ JOIN   gold.dim_store     s ON s.store_id      = f.store_id
 JOIN   gold.dim_date      d ON d.date_key      = f.date_key
 JOIN   gold.dim_household h ON h.household_key = f.household_key
 ORDER  BY f.sales_value DESC
-LIMIT  100;
+LIMIT  30;
 
 
 
--- 4. JOINS - the marketing side 
+-- 4b. JOINS - the marketing side 
 SELECT r.household_key,
        d.date_key            AS redeemed_on,
        c.campaign_type,
@@ -102,7 +104,7 @@ JOIN   gold.dim_campaign  c  ON c.campaign      = r.campaign
 JOIN   gold.dim_coupon    cp ON cp.coupon_upc   = r.coupon_upc
 JOIN   gold.dim_household h  ON h.household_key  = r.household_key
 ORDER  BY d.date_key
-LIMIT  100;
+LIMIT  30;
 
 
 

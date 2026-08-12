@@ -5,6 +5,9 @@ import pandas as pd
 from sqlalchemy import text
 
 from src import config
+from src.logging_config import get_logger
+
+logger = get_logger("bronze")
 
 SKIP_FILES = {"causal_data.csv"}
 CHUNK_ROWS = 50_000  # read this many CSV rows at a time to keep memory low
@@ -30,19 +33,23 @@ def load_csv_to_bronze(engine, csv_path):
 
 
 def main():
-    engine = config.get_engine()
-    with engine.begin() as conn:
-        conn.execute(text("CREATE SCHEMA IF NOT EXISTS bronze;"))
+    try:
+        engine = config.get_engine()
+        with engine.begin() as conn:
+            conn.execute(text("CREATE SCHEMA IF NOT EXISTS bronze;"))
 
-    csvs = [p for p in sorted(config.BRONZE_DIR.glob("*.csv")) if p.name not in SKIP_FILES]
-    assert csvs, f"No CSV files in {config.BRONZE_DIR} - run `python -m src.ingest` first."
+        csvs = [p for p in sorted(config.BRONZE_DIR.glob("*.csv")) if p.name not in SKIP_FILES]
+        assert csvs, f"No CSV files in {config.BRONZE_DIR} - run `python -m src.ingest` first."
 
-    print(f"Loading {len(csvs)} CSV files into schema 'bronze'...")
-    for csv_path in csvs:
-        table, n = load_csv_to_bronze(engine, csv_path)
-        assert n > 0, f"{table} loaded 0 rows!"
-        print(f"  bronze.{table:<20s} {n:>10,} rows")
-    print("Bronze load complete.")
+        logger.info(f"loading {len(csvs)} CSV files into schema 'bronze'")
+        for csv_path in csvs:
+            table, n = load_csv_to_bronze(engine, csv_path)
+            assert n > 0, f"{table} loaded 0 rows!"
+            logger.info(f"bronze.{table}: {n:,} rows")
+        logger.info("bronze load complete")
+    except Exception:
+        logger.error("bronze load failed", exc_info=True)
+        raise
 
 
 if __name__ == "__main__":
